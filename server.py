@@ -31,15 +31,9 @@ game = Game([P1, P2])
 allcards = [Spikes, Seawead, Bubbles, Toxic_Tax, Sludge, Slimey_Slap]
 allcharacters = [Puffer, Ooze]
 
-cardsjson = "["
-for c in allcards:
-    cardsjson += c.createJson().__str__() + ","
-cardsjson = cardsjson[:-1] + "]"
-
-charactersjson = "["
-for chr in allcharacters:
-    charactersjson += chr.createJson().__str__() + ","
-charactersjson = charactersjson[:-1] + "]"
+cardsjson = [card.createJson() for card in allcards]
+charactersjson = [char.createJson() for char in allcharacters]
+json_data = [cardsjson, charactersjson]
 
 game.turn_start()
 
@@ -85,7 +79,7 @@ async def handler(ws):
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
             if message == "get_json":
-                await ws.send(f"JSON:[{json.dumps(cardsjson)},{json.dumps(charactersjson)}]")
+                await ws.send(f"JSON:{json.dumps(json_data)}")
             elif message == "get_choices":
                 str_c = []
                 for i, c in enumerate(game.choices):
