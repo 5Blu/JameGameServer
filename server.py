@@ -28,10 +28,14 @@ async def handler(ws):
             print("Received:", message)
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
-            if message == "get_choices":
+            elif message == "get_choices":
                 await ws.send(f"Choices: {game.choices}")
-            if message.startswith("make_choice"):
+            elif message.startswith("make_choice"):
                 game.make_choice(message.split(" ")[1])
+                await ws.send(f"Game State: {game.report}")
+            else:
+                await ws.send("Invalid Choice")
+
             await ws.send(f"Server got: {message}\nConnected to Twokie VPS")
 
     except websockets.ConnectionClosed:
