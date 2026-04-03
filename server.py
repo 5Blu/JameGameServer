@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import secrets
 from copy import deepcopy
+import json
 from gamelogic import Game, Player, Character, Deck, Card, DamageAbility, HealAbility, IncomeAbility, PoisonAbility
 
 clients = set()
@@ -84,7 +85,7 @@ async def handler(ws):
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
             if message == "get_json":
-                await ws.send(f"JSON:[{cardsjson},{charactersjson}]")
+                await ws.send(f"JSON:[{json.dumps(cardsjson)},{json.dumps(charactersjson)}]")
             elif message == "get_choices":
                 str_c = []
                 for i, c in enumerate(game.choices):
