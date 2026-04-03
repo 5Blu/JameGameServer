@@ -46,6 +46,7 @@ async def handler(ws):
                 for p in game.players:
                     if p.name == "X":
                         p.name = username
+                        break
                 await ws.send(f"auth_ok {token}")
                 continue
 
