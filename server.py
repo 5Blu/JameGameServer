@@ -1,5 +1,6 @@
 import asyncio
 import websockets
+from copy import deepcopy
 from gamelogic import Game, Player, Character, Deck, Card, DamageAbility, HealAbility, IncomeAbility, PoisonAbility
 
 clients = set() 
