@@ -20,7 +20,8 @@ class Player:
             self.out = True
 
 class Character:
-    def __init__(self, name, health, dmg, income, cards):
+    def __init__(self, chrid, name, health, dmg, income, cards):
+        self.chrid = chrid
         self.name = name
         self.health = health
         self.dmg = dmg
@@ -38,15 +39,25 @@ class Character:
                 self.owner.game.say(f"{self.owner.active_character.name} is now active")
             
 
+
     def is_alive(self):
         return self.health > 0
+
+    def createJson(self):
+        return {
+            "chr_id": self.chrid,
+            "name": self.name,
+            "dmg": self.dmg,
+            "income": self.income,
+        }
 
 class Deck:
     def __init__(self, cards):
         self.cards = cards
 
 class Card:
-    def __init__(self, name, cost, effects, text):
+    def __init__(self, cid, name, cost, effects, text):
+        self.cid = cid
         self.name = name
         self.cost = cost
         self.effects = effects
@@ -55,6 +66,14 @@ class Card:
     def play(self,target):
         for e in self.effects:
             e.do(target)
+
+    def createJson(self):
+        return {
+            "c_id": self.cid,
+            "name": self.name,
+            "cost": self.cost,
+            "text": self.text
+        }
 
 class Ability:
     def do(self, target):

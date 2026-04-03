@@ -11,21 +11,35 @@ sessions = {}   # token -> username
 ws_user = {}    # websocket -> username
 
 # (keep your existing game setup unchanged)
-Spikes = Card("Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.")
-Seawead = Card("Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.")
-Bubbles = Card("Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.")
+Spikes = Card(1, "Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.")
+Seawead = Card(2, "Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.")
+Bubbles = Card(3, "Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.")
 
-Toxic_Tax = Card("Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.")
-Sludge = Card("Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.")
-Slimey_Slap = Card("Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
+Toxic_Tax = Card(4, "Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.")
+Sludge = Card(5, "Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.")
+Slimey_Slap = Card(6, "Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
 
-Puffer = Character("Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
-Ooze = Character("Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
+Puffer = Character(1, "Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
+Ooze = Character(2, "Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
 
 P1 = Player("X", Deck([deepcopy(Puffer), deepcopy(Puffer), deepcopy(Puffer)]))
 P2 = Player("X", Deck([deepcopy(Ooze),deepcopy(Ooze),deepcopy(Ooze)]))
 
 game = Game([P1, P2])
+
+allcards = [Spikes, Seawead, Bubbles, Toxic_Tax, Sludge, Slimey_Slap]
+allcharacters = [Puffer, Ooze]
+
+cardsjson = "["
+for c in allcards:
+    cardsjson += c.createJson().__str__() + ","
+cardsjson = cardsjson[:-1] + "]"
+
+charactersjson = "["
+for chr in allcharacters:
+    charactersjson += chr.createJson().__str__() + ","
+charactersjson = charactersjson[:-1] + "]"
+
 game.turn_start()
 
 async def handler(ws):
@@ -69,6 +83,8 @@ async def handler(ws):
             # Existing commands (now authenticated)
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
+            if message == "get_json":
+                await ws.send(f"JSON:[{cardsjson},{charactersjson}]")
             elif message == "get_choices":
                 str_c = []
                 for i, c in enumerate(game.choices):
