@@ -37,7 +37,7 @@ async def handler(ws):
             else:
                 await ws.send("Invalid Choice")
 
-            await ws.send(f"Server got: {message}\nConnected to Twokie VPS")
+            #await ws.send(f"Server got: {message}\nConnected to Twokie VPS")
 
     except websockets.ConnectionClosed:
         print("Client disconnected")
