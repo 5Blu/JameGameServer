@@ -113,6 +113,18 @@ async def handler(ws):
 
                 game.action_recieved(game.choices[idx])
                 await ws.send(f"Game State: {game.report}")
+            elif message.startswith("get_cards"):
+                # Server-side authorization: only active player may act
+                caller = ws_user[ws]
+                current_player_name = game.players[game.current_player_index].name
+                if caller != current_player_name:
+                    await ws.send("error not your turn")
+                    continue
+                ids = []
+                for c in game.cards:
+                    ids.append(c.cid)
+
+                await ws.send(f"CARDS:{ids}")
             else:
                 await ws.send("Invalid Choice")
 
