@@ -23,7 +23,7 @@ async def handler(ws):
 
 
 async def main():
-    async with websockets.serve(handler, "0.0.0.0", 6789):
+    async with websockets.serve(handler, "::", 6789):
         print("Server running on port 6789")
         await asyncio.Future()  # run forever
 
