@@ -42,7 +42,7 @@ async def handler(ws):
 
                 await ws.send(f"Choices: {str_c}")
             elif message.startswith("make_choice"):
-                game.make_choice(game.choices[int(message.split(" "))[1]])
+                game.make_choice(game.choices[int(message.split(" ")[1])])
                 await ws.send(f"Game State: {game.report}")
             else:
                 await ws.send("Invalid Choice")
