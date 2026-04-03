@@ -1,4 +1,3 @@
-
 from copy import deepcopy
 import random
 class Player:
@@ -16,6 +15,7 @@ class Player:
         for c in self.deck.cards:
             if c.is_alive():
                 self.active_character = c
+                break
         if self.active_character is None:
             self.out = True
 
@@ -36,7 +36,6 @@ class Character:
             self.owner.game.say(f"{self.name} has been defeated!")
             if self.owner.active_character is not None:
                 self.owner.game.say(f"{self.owner.active_character.name} is now active")
-
             
 
     def is_alive(self):
@@ -51,14 +50,15 @@ class Card:
         self.name = name
         self.cost = cost
         self.effects = effects
+        self.text = text
 
     def play(self,target):
         for e in self.effects:
             e.do(target)
 
 class Ability:
-    def do(self):
-        print("Error: Ability Parent Class shouldnt be used")
+    def do(self, target):
+        print("Error: Ability Parent Class shouldn't be used")
 class DamageAbility(Ability):
     def __init__(self, damage):
         self.damage = damage
@@ -172,8 +172,10 @@ class Game:
         opponent = self.players[(self.current_player_index + 1) % len(self.players)]
 
         if choice.type == "Pass":
-            player.active_character.take_damage(player.active_character.poison) # Apply poison damage at the end of the turn
-
+            poison_amt = player.active_character.poison
+            if poison_amt > 0:
+                player.active_character.take_damage(poison_amt)
+                player.active_character.poison = 0
 
             self.next_turn()
             self.turn_start()
@@ -188,7 +190,6 @@ class Game:
                 self.say(choice.card.name)
                 self.say(choice.target.name)
             self.get_legal_actions()
-
 
     def make_choice(self, choices):
         self.say("Please Choose between")
