@@ -8,7 +8,6 @@ class Player:
         self.active_character = deck.cards[0]
         self.gold = 0
         self.out = False
-
         for char in deck.cards:
             char.owner = self
 
@@ -27,7 +26,6 @@ class Character:
         self.dmg = dmg
         self.income = income
         self.cards = cards
-
         self.poison = 0
 
     def take_damage(self, damage):
@@ -35,9 +33,9 @@ class Character:
         if self.health <= 0:
             self.health = 0
             self.owner.next_char()
-            print(f"{self.name} has been defeated!")
+            self.owner.game.say(f"{self.name} has been defeated!")
             if self.owner.active_character is not None:
-                print(f"{self.owner.active_character.name} is now active")
+                self.owner.game.say(f"{self.owner.active_character.name} is now active")
 
             
 
@@ -47,7 +45,6 @@ class Character:
 class Deck:
     def __init__(self, cards):
         self.cards = cards
-
 
 class Card:
     def __init__(self, name, cost, effects, text):
@@ -100,6 +97,12 @@ class Game:
         self.ended = False
         self.choices = []
         self.cards = []
+        self.listening = False
+        self.report = []
+        self.log = []
+
+        for p in players:
+            p.game = self
 
     def next_turn(self):
         alive_count = 0 # checks if only 1 player is alive, if so end the game
@@ -108,12 +111,21 @@ class Game:
                 alive_count += 1
         if alive_count <= 1:
             self.ended = True
+            self.say("Game Over")
+            if self.players[0].out:
+                self.say(f"{self.players[1].name} wins!")
+            elif self.players[1].out:
+                self.say(f"{self.players[0].name} wins!")
+            else:
+                self.say("It's a draw!")
             return False
         else:
             self.current_player_index = (self.current_player_index + 1) % len(self.players) # switch who's turn it is
             return True
 
     def turn_start(self):
+        if self.ended:
+            return
         player = self.players[self.current_player_index] # Get the current player and opponent
         opponent = self.players[(self.current_player_index + 1) % len(self.players)]
 
@@ -127,11 +139,13 @@ class Game:
         self.get_legal_actions()
        
     def get_legal_actions(self):
+        if self.ended:
+            return
         player = self.players[self.current_player_index] # Get the current player and opponent
         opponent = self.players[(self.current_player_index + 1) % len(self.players)]
 
-        print(f"{player.name}'s turn. Active character: {player.active_character.name}, Health: {player.active_character.health}, Gold: {player.gold}")
-        print(f"Opponent: {opponent.name}, Active character: {opponent.active_character.name}, Health: {opponent.active_character.health}")
+        self.say(f"{player.name}'s turn. Active character: {player.active_character.name}, Health: {player.active_character.health}, Gold: {player.gold}")
+        self.say(f"Opponent: {opponent.name}, Active character: {opponent.active_character.name}, Health: {opponent.active_character.health}")
 
         choices = []
 
@@ -142,15 +156,25 @@ class Game:
             choices.append(Action("Sell", card))
         choices.append(Action("Pass"))
         self.choices = choices
+        self.listening = True
 
+    def say(self, message):
+        print(message)
+        self.report.append(message)
+        self.log.append(message)
 
 
     def action_recieved(self,choice):
+        self.listening = False
+        self.report = []
+        self.report.append(f"{self.players[self.current_player_index].name} chose to {choice.type} {choice.card.name if choice.card else ''} {'targeting ' + choice.target.name if choice.target else ''}")
         player = self.players[self.current_player_index] # Get the current player and opponent
         opponent = self.players[(self.current_player_index + 1) % len(self.players)]
 
         if choice.type == "Pass":
             player.active_character.take_damage(player.active_character.poison) # Apply poison damage at the end of the turn
+
+
             self.next_turn()
             self.turn_start()
         else:
@@ -161,59 +185,35 @@ class Game:
                 player.gold -= choice.card.cost
                 self.cards.remove(choice.card)
                 choice.card.play(choice.target)
-                print(choice.card.name)
-                print(choice.target.name)
+                self.say(choice.card.name)
+                self.say(choice.target.name)
             self.get_legal_actions()
 
 
     def make_choice(self, choices):
-        print("Please Choose between")
+        self.say("Please Choose between")
         for i, c in enumerate(choices):
             if c.target is not None:
-                print(f"{i}: {c.type} {c.card.name} targeting {c.target.name}")
+                self.say(f"{i}: {c.type} {c.card.name} targeting {c.target.name}")
             elif c.card is not None:
-                print(f"{i}: {c.type} {c.card.name}")
+                self.say(f"{i}: {c.type} {c.card.name}")
             else:
-                print(f"{i}: {c.type}")
+                self.say(f"{i}: {c.type}")
         choice = int(input("  > "))
         if choice >= len(choices) or choice < 0:
-            print("Invalid Choice")
+            self.say("Invalid Choice")
             choice = choices.index(self.make_choice(choices)) # finds the index of the choice that was made when called recuirsively
         if choices[choice].type == "Play" and choices[choice].card.cost > self.players[self.current_player_index].gold:
-            print("Invalid Choice")
+            self.say("Invalid Choice")
             choice = choices.index(self.make_choice(choices)) # finds the index of the choice that was made when called recuirsively
         return choices[choice]
 
 
 
-        print("Game Over")
-        if self.players[0].out:
-            print(f"{self.players[1].name} wins!")
-        elif self.players[1].out:
-            print(f"{self.players[0].name} wins!")
-        else:
-            print("It's a draw!")
 
 
 
-Spikes = Card("Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.")
-Seawead = Card("Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.")
-Bubbles = Card("Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.")
-
-Toxic_Tax = Card("Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.")
-Sludge = Card("Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.")
-Slimey_Slap = Card("Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
-
-Puffer = Character("Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
-Ooze = Character("Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
-
-P1 = Player("Jame", Deck([deepcopy(Puffer), deepcopy(Puffer), deepcopy(Puffer)]))
-P2 = Player("SlugMan", Deck([deepcopy(Ooze),deepcopy(Ooze),deepcopy(Ooze)]))
-
-game = Game([P1, P2])
-game.turn_start()
 
 
-while True:
-    input("> ")
-    game.action_recieved(game.make_choice(game.choices))
+
+

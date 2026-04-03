@@ -1,19 +1,38 @@
 import asyncio
 import websockets
+from gamelogic import Game, Player, Character, Deck, Card, DamageAbility, HealAbility, IncomeAbility, PoisonAbility
 
-clients = set()
- 
+clients = set() 
+
+Spikes = Card("Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.")
+Seawead = Card("Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.")
+Bubbles = Card("Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.")
+
+Toxic_Tax = Card("Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.")
+Sludge = Card("Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.")
+Slimey_Slap = Card("Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
+
+Puffer = Character("Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
+Ooze = Character("Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
+
+P1 = Player("Jame", Deck([deepcopy(Puffer), deepcopy(Puffer), deepcopy(Puffer)]))
+P2 = Player("SlugMan", Deck([deepcopy(Ooze),deepcopy(Ooze),deepcopy(Ooze)]))
+
+game = Game([P1, P2])
+game.turn_start()
+
 async def handler(ws):
     clients.add(ws)
     try:
         async for message in ws:
             print("Received:", message)
-
-            # Echo back to sender
+            if message == "get_state":
+                await ws.send(f"Game State: {game.report}")
+            if message == "get_choices":
+                await ws.send(f"Choices: {game.choices}")
+            if message.startswith("make_choice"):
+                game.make_choice(message.split(" ")[1])
             await ws.send(f"Server got: {message}\nConnected to Twokie VPS")
-
-            # Or broadcast to everyone:
-            # await asyncio.gather(*[c.send(message) for c in clients])
 
     except websockets.ConnectionClosed:
         print("Client disconnected")
