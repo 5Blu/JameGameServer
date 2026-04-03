@@ -112,7 +112,7 @@ async def handler(ws):
         ws_user.pop(ws, None)
 
 async def main():
-    async with websockets.serve(handler, "::", 6789):
+    async with websockets.serve(handler, None, 6789):
         print("Server running on port 6789")
         await asyncio.Future()  # run forever
 
