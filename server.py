@@ -22,8 +22,8 @@ Slimey_Slap = Card("Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
 Puffer = Character("Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
 Ooze = Character("Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
 
-P1 = Player("Jame", Deck([deepcopy(Puffer), deepcopy(Puffer), deepcopy(Puffer)]))
-P2 = Player("SlugMan", Deck([deepcopy(Ooze),deepcopy(Ooze),deepcopy(Ooze)]))
+P1 = Player("X", Deck([deepcopy(Puffer), deepcopy(Puffer), deepcopy(Puffer)]))
+P2 = Player("X", Deck([deepcopy(Ooze),deepcopy(Ooze),deepcopy(Ooze)]))
 
 game = Game([P1, P2])
 game.turn_start()
@@ -43,6 +43,9 @@ async def handler(ws):
                 token = secrets.token_urlsafe(32)
                 sessions[token] = username
                 ws_user[ws] = username
+                for p in game.players:
+                    if p.name == "X":
+                        p.name = username
                 await ws.send(f"auth_ok {token}")
                 continue
 
