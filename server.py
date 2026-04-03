@@ -30,9 +30,19 @@ async def handler(ws):
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
             elif message == "get_choices":
-                await ws.send(f"Choices: {game.choices}")
+                str_c = []
+                
+                for i, c in enumerate(game.choices):
+                    if c.target is not None:
+                        str_c.append(f"{i}: {c.type} {c.card.name} targeting {c.target.name}")
+                    elif c.card is not None:
+                        str_c.append(f"{i}: {c.type} {c.card.name}")
+                    else:
+                        str_c.append(f"{i}: {c.type}")
+
+                await ws.send(f"Choices: {str_c}")
             elif message.startswith("make_choice"):
-                game.make_choice(message.split(" ")[1])
+                game.make_choice(game.choices[message.split(" ")[1]])
                 await ws.send(f"Game State: {game.report}")
             else:
                 await ws.send("Invalid Choice")
