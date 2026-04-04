@@ -49,6 +49,8 @@ class Character:
             "name": self.name,
             "dmg": self.dmg,
             "income": self.income,
+            "health": self.health,
+            "poison": self.poison
         }
 
 class Deck:
