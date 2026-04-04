@@ -116,13 +116,15 @@ async def handler(ws):
                     
                 chc = "["
                 for i, c in enumerate(game.choices):
+                    chc += "{"
                     if c.target is not None:
-                        chc += f'"option":{i},"c_id":{c.card.cid},"type":{c.type},"target":{c.target.name}'
+                        chc += f'"option":{i},"c_id":{c.card.cid},"type":{c.type},"target":"{c.target.name}"'
                     elif c.card is not None:
                         chc + f'"option":{i},"c_id":{c.card.cid},"type":{c.type},"target":"None"'
                     else:
                         chc + f'"option":{i},"c_id":"None","type":{c.type},"target":"None"'
-                chc += "]"
+                    chc += "},"
+                chc = chc[:-1] + "]"
                 await ws.send(f"CARDS:[{ids},{chc}]")
             else:
                 await ws.send("Invalid Choice")
