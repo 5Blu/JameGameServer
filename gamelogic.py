@@ -185,6 +185,23 @@ class Game:
         self.report.append(message)
         self.log.append(message)
 
+    def get_statejson(self):
+        statejson = []
+        for p in self.players:
+            p_json = {
+                "name": p.name,
+                "gold": p.gold,
+                "active_character": p.active_character.createJson(),
+                "out": p.out
+            }
+            charjson = []
+            for char in p.deck.cards:
+                charjson.append(char.createJson())
+            p_json["characters"] = charjson
+        return statejson
+
+
+
 
     def action_recieved(self,choice):
         self.listening = False
