@@ -7,18 +7,17 @@ from gamelogic import Game, Player, Character, Deck, Card, DamageAbility, HealAb
 
 clients = set()
 
-# In-memory session store and connection map
-sessions = {}   # token -> username
-ws_user = {}    # websocket -> username
 
-# (keep your existing game setup unchanged)
-Spikes = Card(1, "Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.")
-Seawead = Card(2, "Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.")
-Bubbles = Card(3, "Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.")
+sessions = {}  
+ws_user = {}    
 
-Toxic_Tax = Card(4, "Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.")
-Sludge = Card(5, "Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.")
-Slimey_Slap = Card(6, "Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.")
+Spikes = Card(1, "Spikes", 3, [DamageAbility(2),PoisonAbility(2)], "Deal 2 damage, inflict 2 poison.", False)
+Seawead = Card(2, "Seaweed", 2, [HealAbility(1), IncomeAbility(1)], "Heal 1 health, increase income by 1.", True)
+Bubbles = Card(3, "Bubbles", 2, [DamageAbility(3)], "Deal 3 damage.", False)
+
+Toxic_Tax = Card(4, "Toxic Tax", 3, [DamageAbility(2), IncomeAbility(-1)], "Deal 2 damage, decrease income by 1.", False)
+Sludge = Card(5, "Sludge", 2, [DamageAbility(1), PoisonAbility(2)], "Deal 1 damage, inflict 2 poison.", False)
+Slimey_Slap = Card(6, "Slimey Slap", 4, [DamageAbility(5)], "Deal 5 damage.", False)
 
 Puffer = Character(1, "Puffer", 20, 3, 1, [Spikes, Seawead, Bubbles])
 Ooze = Character(2, "Ooze", 30, 2, 1, [Toxic_Tax, Sludge, Slimey_Slap])
@@ -43,7 +42,7 @@ async def handler(ws):
         async for message in ws:
             print("Received:", message)
 
-            # Auth command (prototype): "auth <username>" -> server returns "auth_ok <token>"
+            # Auth command: "auth <username>"
             if message.startswith("auth "):
                 username = message.split(" ", 1)[1].strip()
                 if not username:
@@ -56,6 +55,7 @@ async def handler(ws):
                     if p.name == "X":
                         p.name = username
                         break
+                game.clients.add(ws)
                 await ws.send(f"auth_ok {token}")
                 continue
 

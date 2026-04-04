@@ -56,12 +56,13 @@ class Deck:
         self.cards = cards
 
 class Card:
-    def __init__(self, cid, name, cost, effects, text):
+    def __init__(self, cid, name, cost, effects, text, tgt_slf_dft):
         self.cid = cid
         self.name = name
         self.cost = cost
         self.effects = effects
         self.text = text
+        self.tgt_slf_dft = tgt_slf_dft
 
     def play(self,target):
         for e in self.effects:
@@ -72,7 +73,8 @@ class Card:
             "c_id": self.cid,
             "name": self.name,
             "cost": self.cost,
-            "text": self.text
+            "text": self.text,
+            "tgt_slf_dft": self.tgt_slf_dft
         }
 
 class Ability:
@@ -119,6 +121,7 @@ class Game:
         self.listening = False
         self.report = []
         self.log = []
+        self.clients = set()
 
         for p in players:
             p.game = self
