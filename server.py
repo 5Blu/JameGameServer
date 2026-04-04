@@ -102,7 +102,7 @@ async def handler(ws):
                     continue
 
                 game.action_recieved(game.choices[idx])
-                await ws.send(f"Game State: {game.report}")
+                await broadcast_to_game(game.clients, f"STATE:{json.dumps(game.get_statejson())}")
             elif message.startswith("get_cards"):
                 # Server-side authorization: only active player may act
                 caller = ws_user[ws]
@@ -134,6 +134,18 @@ async def handler(ws):
     finally:
         clients.discard(ws)
         ws_user.pop(ws, None)
+
+async def broadcast_to_game(g_clients, msg):
+    dead = []
+    for client in g_clients:
+        try:
+            await client.send(msg)
+        except:
+            dead.append(client)
+
+    # clean up disconnected clients
+    for d in dead:
+        g_clients.discard(d)
 
 async def main():
     async with websockets.serve(handler, None, 6789):
