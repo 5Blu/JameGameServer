@@ -103,6 +103,8 @@ async def handler(ws):
 
                 game.action_recieved(game.choices[idx])
                 await broadcast_to_game(game.clients, f"STATE:{json.dumps(game.get_statejson())}")
+            elif message.startswith("get_choices"):
+                await ws.send(game.choices)
             elif message.startswith("get_cards"):
                 # Server-side authorization: only active player may act
                 caller = ws_user[ws]
