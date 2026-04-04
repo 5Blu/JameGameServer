@@ -120,9 +120,9 @@ async def handler(ws):
                     if c.target is not None:
                         chc += f'"option":{i},"c_id":{c.card.cid},"type":"{c.type}","target":"{c.target.name}"'
                     elif c.card is not None:
-                        chc + f'"option":{i},"c_id":{c.card.cid},"type":"{c.type}","target":"None"'
+                        chc += f'"option":{i},"c_id":{c.card.cid},"type":"{c.type}","target":"None"'
                     else:
-                        chc + f'"option":{i},"c_id":"None","type":"{c.type}","target":"None"'
+                        chc += f'"option":{i},"c_id":"None","type":"{c.type}","target":"None"'
                     chc += "},"
                 chc = chc[:-1] + "]"
                 await ws.send(f"CARDS:[{ids},{chc}]")
