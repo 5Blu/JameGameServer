@@ -78,18 +78,8 @@ async def handler(ws):
             # Existing commands (now authenticated)
             if message == "get_state":
                 await ws.send(f"Game State: {game.report}")
-            if message == "get_json":
+            elif message == "get_json":
                 await ws.send(f"JSON:{json.dumps(json_data)}")
-            elif message == "get_choices":
-                str_c = []
-                for i, c in enumerate(game.choices):
-                    if c.target is not None:
-                        str_c.append(f"{i}: {c.type} {c.card.name} targeting {c.target.name}")
-                    elif c.card is not None:
-                        str_c.append(f"{i}: {c.type} {c.card.name}")
-                    else:
-                        str_c.append(f"{i}: {c.type}")
-                await ws.send(f"Choices: {str_c}")
             elif message.startswith("make_choice"):
                 # Server-side authorization: only active player may act
                 caller = ws_user[ws]
@@ -123,8 +113,16 @@ async def handler(ws):
                 ids = []
                 for c in game.cards:
                     ids.append(c.cid)
-
-                await ws.send(f"CARDS:{ids}")
+                    
+                chc = "["
+                for i, c in enumerate(game.choices):
+                    if c.target is not None:
+                        chc.append(f'"option":{i},"c_id":{c.c_id},"type":{c.type},"target":{c.target.name}')
+                    elif c.card is not None:
+                        chc.append(f'"option":{i},"c_id":{c.c_id},"type":{c.type},"target":"None"')
+                    else:
+                        chc.append(f'"option":{i},"c_id":"None","type":{c.type},"target":"None"')
+                await ws.send(f"CARDS:[{ids},{chc}]")
             else:
                 await ws.send("Invalid Choice")
 
