@@ -198,6 +198,7 @@ class Game:
             for char in p.deck.cards:
                 charjson.append(char.createJson())
             p_json["characters"] = charjson
+            statejson.append(p_json)
         return statejson
 
 
