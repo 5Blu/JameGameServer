@@ -77,7 +77,7 @@ async def handler(ws):
 
             # Existing commands (now authenticated)
             if message == "get_state":
-                await ws.send(f"STATE:{json.dumps(game.get_statejson)}")
+                await ws.send(f"STATE:{json.dumps(game.get_statejson())}")
             elif message == "get_json":
                 await ws.send(f"JSON:{json.dumps(json_data)}")
             elif message.startswith("make_choice"):
