@@ -217,7 +217,7 @@ class Game:
             poison_amt = player.active_character.poison
             if poison_amt > 0:
                 player.active_character.take_damage(poison_amt)
-                player.active_character.poison = 0
+                player.active_character.poison -= 1
 
             self.next_turn()
             self.turn_start()
